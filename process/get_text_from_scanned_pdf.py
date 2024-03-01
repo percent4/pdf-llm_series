@@ -39,7 +39,7 @@ def image_ocr(image_path):
     # get ocr result
     data = {'images': [cv2_to_base64(cv2.imread(image_path))]}
     headers = {"Content-type": "application/json"}
-    url = "http://localhost:50076/predict/ch_pp-ocrv3"
+    url = "http://35.89.147.116:50076/predict/ch_pp-ocrv3"
     r = requests.post(url=url, headers=headers, data=json.dumps(data))
     if r.json()["results"]:
         return "\n".join([ocr_record["text"].strip() for ocr_record in r.json()["results"][0]["data"]])
@@ -74,6 +74,10 @@ if __name__ == '__main__':
     predict_answer = get_answer(pdf_content=page1_ocr_result, query=query1)
     print("回答:", predict_answer)
 
+    query2 = "这本书的作者是谁？"
+    predict_answer = get_answer(pdf_content=page1_ocr_result, query=query2)
+    print("回答:", predict_answer)
+
 
 """
 识别文字内容: 作者简介
@@ -89,4 +93,5 @@ R.N.艾略特（1871-1948），波浪理论的创始人，
 的篇幅。
 ee more oleasevisit:htuos/nomeoto
 回答: 破浪理论的创始人是R.N.艾略特，他出生于1871年。
+回答: 这本书的作者是 R.N.艾略特，他是波浪理论的创始人。
 """
