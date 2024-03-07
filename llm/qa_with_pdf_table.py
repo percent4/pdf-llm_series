@@ -24,7 +24,7 @@ def get_pdf_content(pdf_path: str) -> str:
 
 
 # Function to encode the image
-def encode_image(image_path):
+def encode_image(image_path: str):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
@@ -78,3 +78,10 @@ if __name__ == '__main__':
     test_query = "what's the rank of Alex's city?"
     test_pdf_content = get_pdf_content(pdf_path=pdf_file_path)
     make_request(pdf_content=test_pdf_content, images=table_images_list, query=test_query)
+
+"""
+[{'finish_reason': 'stop',
+  'index': 0,
+  'message': {'content': "The rank of Alex's city, Shanghai, is 2.",
+              'role': 'assistant'}}]
+"""
