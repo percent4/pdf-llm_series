@@ -23,20 +23,19 @@ def get_most_suitable_font_size(page, write_rect, write_text, line_height):
     min_dist = 10000
     suitable_font_size = 5.0
     tw = fitz.TextWriter(page.rect)
-    for font_size in range(10, 41, 1):
-        font_size_used = font_size / 2
+    for font_size in range(5, 21, 1):
         tw.fill_textbox(
             rect=(write_rect[0], write_rect[1], write_rect[2], page.rect[3]),
             text=write_text,
             pos=(write_rect[0], write_rect[1]),
             font=font,
-            fontsize=font_size_used,
+            fontsize=font_size,
             lineheight=line_height)
         last_point_x, last_point_y = tw.last_point.x, tw.last_point.y
         dist = calc_distance([last_point_x, last_point_y], [
                              write_rect[2], write_rect[3]])
         if last_point_x < write_rect[2] and last_point_y < write_rect[3] and dist < min_dist:
-            suitable_font_size = font_size_used
+            suitable_font_size = font_size
             min_dist = dist
     return suitable_font_size
 
@@ -61,20 +60,20 @@ def recover_pdf_page(
         if rect_type in ["table", "figure"]:
             region_img = image.crop(region)
             save_image_path = os.path.dirname(page_image) + "/tmp.jpg"
-            img_region = [int(_ * ratio) for _ in region]
+            img_region = [_ * ratio for _ in region]
             new_region_img = region_img.resize(
-                (img_region[2] - img_region[0], img_region[3] - img_region[1]))
+                (int(img_region[2] - img_region[0]), int(img_region[3] - img_region[1])))
             new_region_img.save(save_image_path, 'JPEG', quality=95)
             write_page.insert_image(img_region, filename=save_image_path)
         else:
             # 读取文字
-            text_region = [int(_ * ratio) for _ in region]
+            text_region = [_ * ratio for _ in region]
             rect = fitz.Rect(text_region)
-            text = read_page.get_textbox(rect)
-            string = text.replace('\n', '')
+            text = read_page.get_textbox(rect).replace('\n', ' ')
+            print(repr(f"text rect: {text_region}, text: {text}"))
             write_page.insert_font(fontname=FONT_NAME, fontfile=FONT_FILE)
             # 插入翻译后的文字
-            translate_string = translate_api(text=string)
+            translate_string = translate_api(text=text)
             # shape = write_page.new_shape()
             line_height = 1.5 if "。" in translate_string else 1
             font_size_to_use = get_most_suitable_font_size(
@@ -83,7 +82,7 @@ def recover_pdf_page(
                 write_rect=text_region,
                 line_height=line_height)
             print(
-                f"\ntext: {string}\ntranslate text: {translate_string}\nfont size: {font_size_to_use}\n")
+                f"\ntext: {text}\ntranslate text: {translate_string}\nfont size: {font_size_to_use}\n")
             tw = fitz.TextWriter(write_page.rect)
             tw.fill_textbox(
                 rect=text_region,
@@ -101,7 +100,7 @@ if __name__ == '__main__':
     read_doc = fitz.open('../data/llama_split.pdf')
     write_doc = fitz.open()
     pdf_name = "llama_split"
-    pages = 6
+    pages = 2
     for i in range(pages):
         read_page = read_doc[i]
         write_page = write_doc.new_page()
