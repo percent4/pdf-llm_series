@@ -68,7 +68,6 @@ class ImageEmbedding(object):
             table_figure_caption_dict = json.loads(f.read())
 
         entities = []
-        _id = 1
         for file in os.listdir(self.res_dir):
             if (file.startswith('[') or file.startswith('table')) and file.endswith('jpg'):
                 file_path = os.path.join(self.res_dir, file)
@@ -76,9 +75,8 @@ class ImageEmbedding(object):
                 print(f'get embedding for {file_path} with caption: {caption}')
                 image_embedding = get_multi_modal_embedding(image_path=file_path, text=caption)
                 data_type = "table" if "table" in file else "image"
-                entities.append({"id": _id, "pdf_path": self.pdf_file_path, "data_type": data_type, "text": caption,
+                entities.append({"pdf_path": self.pdf_file_path, "data_type": data_type, "text": caption,
                                  "image_path": file_path, "embedding": image_embedding})
-                _id += 1
 
         # Inserts vectors in the collection
         self.milvus_client.insert(collection_name="pdf_image_qa", data=entities)
@@ -120,7 +118,7 @@ class TextEmbedding(object):
             batch_chunk_embeddings = get_text_embedding(text_chunks=chunks[start_no:start_no+batch_size])
             chunk_embeddings.extend(batch_chunk_embeddings)
             start_no += batch_size
-        entities = [{"id": i+1, "pdf_path": self.pdf_file_path, "text": chunks[i], "embedding": chunk_embeddings[i]}
+        entities = [{"pdf_path": self.pdf_file_path, "text": chunks[i], "embedding": chunk_embeddings[i]}
                     for i in range(len(chunks))]
         self.milvus_client.insert(collection_name="pdf_text_qa", data=entities)
 

@@ -114,7 +114,7 @@ class TableFigureMatch(object):
 
 
 if __name__ == '__main__':
-    pdf_path = '../data/LLaMA.pdf'
-    res_output_dir = '../output/LLaMA'
+    pdf_path = '../data/BLOOM.pdf'
+    res_output_dir = '../output/BLOOM'
     table_figure_matcher = TableFigureMatch(pdf_file_path=pdf_path, res_dir=res_output_dir)
     table_figure_matcher.run()

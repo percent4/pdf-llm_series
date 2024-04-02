@@ -35,7 +35,7 @@ def create_schema(collect_name, fields, desc):
 if not client.has_collection(image_collection_name) and not client.has_collection(text_collection_name):
     # Creates an image collection
     images_fields = [
-        FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=False),
+        FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
         FieldSchema(name="pdf_path", dtype=DataType.VARCHAR, max_length=100),
         FieldSchema(name="data_type", dtype=DataType.VARCHAR, max_length=20),
         FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=1000),
@@ -46,7 +46,7 @@ if not client.has_collection(image_collection_name) and not client.has_collectio
     create_schema(collect_name=image_collection_name, fields=images_fields, desc=image_collection_desc)
     # Creates a text collection
     text_fields = [
-        FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=False),
+        FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
         FieldSchema(name="pdf_path", dtype=DataType.VARCHAR, max_length=100),
         FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=3000),
         FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1536)

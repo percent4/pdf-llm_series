@@ -95,17 +95,21 @@ class MultiModelQA(object):
 if __name__ == '__main__':
     client = MilvusClient(uri="http://localhost:19530", db_name="default")
     my_query = "What is LLaMA-7B's zero-shot accuracy on RACE dataset?"
-    my_query = "What is LLaMA model's accuracy on MMLU dataset?"
-    my_query = "LLaMA 7B zero-shot performance on PIQA, SIQA, BoolQ dataset"
+    my_query = "What is LLaMA model's average accuracy on MMLU dataset?"
+    # my_query = "LLaMA 7B zero-shot performance on PIQA, SIQA, BoolQ dataset"
     my_query = "pretraining data of LLaMA and their prop"
-    my_query = "What are mathematical reasoning benchmarks in this paper?"
-    my_query = "what is the use of TruthfulQA?"
+    # my_query = "What are mathematical reasoning benchmarks in this paper?"
+    # my_query = "what is the use of TruthfulQA?"
+    my_query = "What's carbon emission of BLOOM?"
+    my_query = "What's the number of data parallelism, tensor parallelism, pipeline parallelism in 3D-parallelism during the training of BLOOM?"
+    my_query = "what is the training framework of BLOOM?"
     content_retriever = ContentRetrieval(query=my_query, milvus_client=client)
     image_result, text_result = content_retriever.run()
     retrieved_text_chunks = [_['text'] for _ in text_result]
     retrieved_images = [_['image_path'] for _ in image_result]
     print(retrieved_images)
     retrieved_captions = [_['text'] for _ in image_result]
+    print(retrieved_captions)
     mm_qa = MultiModelQA(
         query=my_query,
         text_chunks=retrieved_text_chunks,

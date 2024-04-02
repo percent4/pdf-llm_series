@@ -3,9 +3,9 @@ Multi modal RAG for PDF file.
 
 ### demo
 
-PDF file: LLaMA.pdf
+#### LLaMA.pdf
 
-qa based on tables or images:
+##### qa based on tables or images
 
 - query: What is LLaMA-7B's zero-shot accuracy on RACE dataset?
 
@@ -14,11 +14,13 @@ answer:
 LLaMA-7B's zero-shot accuracy on the RACE dataset is 61.1% for RACE-middle and 46.9% for RACE-high.
 ```
 
-- query: What is LLaMA model's accuracy on MMLU dataset?
+- query: What is LLaMA model's average accuracy on MMLU dataset?
 
 answer: 
 ```commandline
-The LLaMA model's accuracy on the MMLU dataset for the 65B parameter version is 63.4%.
+The LLaMA model's average accuracy on the Massive Multitask Language Understanding (MMLU) dataset is 63.4% as indicated in Table 9.
+
+If you refer to the detailed results provided in Table 16, the average accuracy of the LLaMA 65B model specifically across all domains for the 5-shot setting is 63.4%.
 ```
 
 - query: LLaMA 7B zero-shot performance on PIQA, SIQA, BoolQ dataset
@@ -49,7 +51,7 @@ The pre-training data of LLaMA and their proportions from the various sources ar
 These sources were used for pre-training LLaMA models, with CommonCrawl being the largest proportion of the data used. The percentages indicate how much of each source was included in the mix of pre-training data.
 ```
 
-qa_based_on_pure_text:
+##### qa based on pure text
 
 - query: What are mathematical reasoning benchmarks in this paper?
 
@@ -62,4 +64,37 @@ The mathematical reasoning benchmarks mentioned in the text are MATH and GSM8k. 
 
 ```commandline
 TruthfulQA is a benchmark designed to measure the truthfulness of a model's responses. Specifically, it evaluates the ability of a model to identify when a claim is true in the context of "literal truth about the real world" rather than claims that may only be considered true within a belief system or tradition. This means that TruthfulQA aims to help determine how effectively a model can distinguish valid information from misinformation or false claims, which can be indicative of the model's potential to generate reliable or misleading content. It is used to assess the risks of models in generating misinformation and to improve the design of models to mitigate these risks. The benchmark typically includes a set of questions that a language model must answer, and the model's responses are evaluated for both truthfulness and informativeness.
+```
+
+#### BLOOM.pdf
+
+##### qa based on tables or images
+
+- query: What's carbon emission of BLOOM?
+
+answer:
+```commandline
+As shown in the first image, the CO2 equivalent emissions for BLOOM are listed as 25 tons. This is in the context of comparing it to similar large language models (LLMs) such as GPT-3, Gopher, and OPT. The table indicates the number of parameters, power consumption, and the resulting carbon emissions for each model.
+```
+
+- query: What's the number of data parallelism, tensor parallelism, pipeline parallelism in 3D-parallelism during the training of BLOOM?
+
+answer:
+```commandline
+In the second image which illustrates the 3D-parallelism used during the training of BLOOM, it shows:
+
+- Data Parallelism (DP): 8 copies of the model are trained in parallel.
+- Tensor Parallelism (TP): Model parameters are divided across 4 GPUs.
+- Pipeline Parallelism (PP): The layers of the model are spread across 12 groups of GPUs.
+
+Therefore, the numbers for data parallelism, tensor parallelism, and pipeline parallelism are 8, 4, and 12, respectively.
+```
+
+##### qa based on pure text
+
+- query: what is the training framework of BLOOM?
+
+answer:
+```commandline
+The training framework for BLOOM is Megatron-DeepSpeed, which utilizes large-scale distributed training. The Megatron-LM component provides the Transformer implementation, tensor parallelism, and data loading primitives, while DeepSpeed offers the ZeRO optimizer, model pipelining, and general distributed training components. This allows for efficient training with 3D parallelism, which is a combination of data parallelism (DP), tensor parallelism (TP), and pipeline parallelism (PP).
 ```
