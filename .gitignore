@@ -4,4 +4,4 @@ __pycache__
 logs
 */logs
 output
-llm/.env
+*/.env

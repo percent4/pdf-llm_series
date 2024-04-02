@@ -2,12 +2,12 @@ import cv2
 import json
    
 # path  
-path = '../output/book_split/book_split_1.jpg'
+path = '../output/BLOOM/BLOOM_29.jpg'
 image = cv2.imread(path)
 print(image.shape)
    
 # data
-res_path = '../output/book_split/res_1.txt'
+res_path = '../output/BLOOM/res_29.txt'
 with open(res_path, 'r') as f:
     content = [json.loads(_.strip()) for _ in f.readlines()]
 

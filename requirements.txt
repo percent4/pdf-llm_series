@@ -1,4 +1,4 @@
-PyMuPDF==1.23.26
+PyMuPDF==1.24.0
 openai==1.13.3
 openpyxl==3.1.2
 pillow==10.2.0
@@ -7,3 +7,6 @@ torch==2.1.2
 transformers==4.36.2
 paddlepaddle==2.6.1
 paddleocr==2.7.2
+langchain==0.1.14
+requests==2.31.0
+tiktoken==0.6.0
