@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # @place: Pudong, Shanghai
-# @file: get_table_and_caption.py
+# @file: get_table_figure_caption.py
 # @time: 2024/3/28 10:38
 # use fitz to get table and its caption from pdf file
 import math
@@ -9,14 +9,15 @@ import json
 import re
 from operator import itemgetter
 import fitz
-from PIL import Image
 # 为图片或表格匹配对应的caption
 
 
 class TableFigureMatch(object):
-    def __init__(self, pdf_file_path, res_dir):
+    def __init__(self, pdf_file_path, save_folder="../output"):
         self.pdf_file_path = pdf_file_path
-        self.res_dir = res_dir
+        self.save_folder = save_folder
+        self.file_name = os.path.basename(self.pdf_file_path).split('.')[0]
+        self.res_dir = os.path.join(self.save_folder, f"{self.file_name}")
 
     # get table or figure caption in each PDF page
     def get_caption_by_page(self, data_type):
@@ -43,16 +44,8 @@ class TableFigureMatch(object):
                     if text.lower().startswith(data_type):
                         table_page_dict['-'.join([str(x) for x in bbox])] = text
             page_dict_list.append(table_page_dict)
-        page_height = page_dict['height']
         doc.close()
-        return page_height, page_dict_list
-
-    def get_pdf_img_ration(self, pdf_height):
-        path_name = self.pdf_file_path.split('/')[-1].split('.')[0]
-        image_path = os.path.join(self.res_dir, f"{path_name}_0.jpg")
-        with Image.open(image_path).convert('RGB') as image:
-            image_height = image.height
-        return pdf_height/image_height
+        return page_dict_list
 
     @staticmethod
     def find_rect_center(rect):
@@ -80,8 +73,7 @@ class TableFigureMatch(object):
 
     def match_caption_by_page(self, data_type):
         data_type_caption_dict = {}
-        pdf_height, page_dict_list = self.get_caption_by_page(data_type=data_type)
-        pdf_img_ration = self.get_pdf_img_ration(pdf_height=pdf_height)
+        page_dict_list = self.get_caption_by_page(data_type=data_type)
         for file in os.listdir(self.res_dir):
             if file.startswith("res"):
                 pg_num = int(re.findall('\d+', file)[0])
@@ -90,17 +82,16 @@ class TableFigureMatch(object):
                     content = [json.loads(_.strip()) for _ in f.readlines()]
                 cnt = 1
                 for line in content:
-                    rect_type, rect_bbox = line['type'], line['bbox']
-                    pdf_rect_bbox = [_ * pdf_img_ration for _ in rect_bbox]
-                    if rect_type == data_type and page_dict_list[pg_num]:
-                        caption_rect_list = [[float(x) for x in _.split('-')]for _ in page_dict_list[pg_num].keys()]
+                    rect_type, pdf_rect_bbox = line['type'], line['bbox']
+                    if rect_type == data_type and page_dict_list[pg_num-1]:
+                        caption_rect_list = [[float(x) for x in _.split('-')]for _ in page_dict_list[pg_num-1].keys()]
                         neighbor_rect = self.find_neighbor_rect(rect1=pdf_rect_bbox, rect_list=caption_rect_list)
                         if data_type == 'table':
-                            file_path = f'table_{pg_num}_{cnt}.jpg'
+                            file_path = f'{pg_num}_{cnt}_table.jpg'
                             cnt += 1
                         else:
-                            file_path = f"[{', '.join([str(_) for _ in rect_bbox])}]_{pg_num}.jpg"
-                        data_type_caption_dict[file_path] = page_dict_list[pg_num]['-'.join([str(_) for _ in neighbor_rect])]
+                            file_path = f"[{', '.join([str(_) for _ in pdf_rect_bbox])}]_{pg_num}.jpg"
+                        data_type_caption_dict[file_path] = page_dict_list[pg_num-1]['-'.join([str(_) for _ in neighbor_rect])]
         return data_type_caption_dict
 
     def run(self):
@@ -114,7 +105,6 @@ class TableFigureMatch(object):
 
 
 if __name__ == '__main__':
-    pdf_path = '../data/BLOOM.pdf'
-    res_output_dir = '../output/BLOOM'
-    table_figure_matcher = TableFigureMatch(pdf_file_path=pdf_path, res_dir=res_output_dir)
+    pdf_path = '../data/Attention.pdf'
+    table_figure_matcher = TableFigureMatch(pdf_file_path=pdf_path)
     table_figure_matcher.run()

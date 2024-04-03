@@ -5,7 +5,7 @@
 # PyMuPDF==1.23.26
 import fitz
 
-pdf_path = "../data/demo1.pdf"
+pdf_path = "../data/LLaMA.pdf"
 doc = fitz.open(pdf_path)
 
 # basic PDF info

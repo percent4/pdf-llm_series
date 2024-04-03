@@ -51,11 +51,11 @@ class MultiModelQA(object):
                 }
             })
         # get caption desc
-        seq_no_list = ['first', 'second', 'third', 'forth', 'fifth']
+        seq_no_list = ['first', 'second', 'third', 'forth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
         caption_list = []
         for i, caption in enumerate(self.captions):
-            caption_list.append(
-                f"The caption of {seq_no_list[i]} image is {caption}.")
+            if caption:
+                caption_list.append(f"The caption of {seq_no_list[i]} image is {caption}.")
         caption_desc = '\n'.join(caption_list)
         messages = [{"role": "system",
                      "content": "You are a helpful assistant."},
@@ -100,16 +100,21 @@ if __name__ == '__main__':
     my_query = "pretraining data of LLaMA and their prop"
     # my_query = "What are mathematical reasoning benchmarks in this paper?"
     # my_query = "what is the use of TruthfulQA?"
-    my_query = "What's carbon emission of BLOOM?"
-    my_query = "What's the number of data parallelism, tensor parallelism, pipeline parallelism in 3D-parallelism during the training of BLOOM?"
-    my_query = "what is the training framework of BLOOM?"
+    # my_query = "What's carbon emission of BLOOM?"
+    # my_query = "What's the number of data parallelism, tensor parallelism, pipeline parallelism in 3D-parallelism during the training of BLOOM?"
+    # my_query = "What is the training framework of BLOOM?"
+    # my_query = "What is the training framework of BLOOM? What's the number of data parallelism, tensor parallelism, pipeline parallelism in 3D-parallelism during the training of BLOOM?"
+    my_query = "What's BERT large performance on QQP dataset in GLUE benchmark?"
+    my_query = "the input Embeddings of BERT, and what is the fist and last token of the input text?"
+    my_query = "What stands for GLUE in the paper of BERT?"
+    my_query = "What is the per-layer complexity in self attention?"
+    my_query = "the architecture of Transformer Encoder"
+    my_query = "How many GPUs are used for training Transformer?"
     content_retriever = ContentRetrieval(query=my_query, milvus_client=client)
     image_result, text_result = content_retriever.run()
     retrieved_text_chunks = [_['text'] for _ in text_result]
     retrieved_images = [_['image_path'] for _ in image_result]
-    print(retrieved_images)
     retrieved_captions = [_['text'] for _ in image_result]
-    print(retrieved_captions)
     mm_qa = MultiModelQA(
         query=my_query,
         text_chunks=retrieved_text_chunks,

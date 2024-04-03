@@ -58,9 +58,11 @@ def get_text_embedding(text_chunks):
 
 
 class ImageEmbedding(object):
-    def __init__(self, pdf_file_path, res_dir, milvus_client):
-        self.res_dir = res_dir
+    def __init__(self, pdf_file_path, milvus_client, save_folder="../output"):
         self.pdf_file_path = pdf_file_path
+        self.save_folder = save_folder
+        self.file_name = os.path.basename(self.pdf_file_path).split('.')[0]
+        self.res_dir = os.path.join(self.save_folder, f"{self.file_name}")
         self.milvus_client = milvus_client
 
     def run(self):
@@ -69,17 +71,22 @@ class ImageEmbedding(object):
 
         entities = []
         for file in os.listdir(self.res_dir):
-            if (file.startswith('[') or file.startswith('table')) and file.endswith('jpg'):
+            if (file.startswith('[') or 'table' in file) and file.endswith('jpg'):
                 file_path = os.path.join(self.res_dir, file)
                 caption = table_figure_caption_dict.get(file, "")
                 print(f'get embedding for {file_path} with caption: {caption}')
                 image_embedding = get_multi_modal_embedding(image_path=file_path, text=caption)
                 data_type = "table" if "table" in file else "image"
-                entities.append({"pdf_path": self.pdf_file_path, "data_type": data_type, "text": caption,
-                                 "image_path": file_path, "embedding": image_embedding})
+                entities.append({"pdf_path": self.pdf_file_path,
+                                 "data_type": data_type,
+                                 "text": caption,
+                                 "image_path": file_path,
+                                 "embedding": image_embedding})
 
         # Inserts vectors in the collection
-        self.milvus_client.insert(collection_name="pdf_image_qa", data=entities)
+        self.milvus_client.insert(
+            collection_name="pdf_image_qa",
+            data=entities)
 
 
 class TextEmbedding(object):
@@ -103,8 +110,9 @@ class TextEmbedding(object):
             chunk_size=300, chunk_overlap=0, encoding_name="cl100k_base"
         )
         chunks = []
-        for text in text_list:
-            chunks.extend(text_splitter.split_text(text))
+        for page_no, text in enumerate(text_list):
+            for chunk in text_splitter.split_text(text):
+                chunks.append((chunk, page_no + 1))
         return chunks
 
     def run(self):
@@ -115,20 +123,25 @@ class TextEmbedding(object):
         chunk_embeddings = []
         while start_no < len(chunks):
             print(f"start no: {start_no}")
-            batch_chunk_embeddings = get_text_embedding(text_chunks=chunks[start_no:start_no+batch_size])
+            batch_chunk_embeddings = get_text_embedding(
+                text_chunks=[_[0] for _ in chunks[start_no:start_no + batch_size]])
             chunk_embeddings.extend(batch_chunk_embeddings)
             start_no += batch_size
-        entities = [{"pdf_path": self.pdf_file_path, "text": chunks[i], "embedding": chunk_embeddings[i]}
-                    for i in range(len(chunks))]
+        entities = [{"pdf_path": self.pdf_file_path,
+                     "text": chunks[i][0],
+                     "page_no": chunks[i][1],
+                     "embedding": chunk_embeddings[i]} for i in range(len(chunks))]
         self.milvus_client.insert(collection_name="pdf_text_qa", data=entities)
 
 
 if __name__ == '__main__':
-    pdf_path = '../data/LLaMA.pdf'
-    res_output_dir = '../output/LLaMA'
+    pdf_path = '../data/Attention.pdf'
     client = MilvusClient(uri="http://localhost:19530", db_name="default")
-    my_image_embedding = ImageEmbedding(pdf_file_path=pdf_path, res_dir=res_output_dir, milvus_client=client)
+    my_image_embedding = ImageEmbedding(
+        pdf_file_path=pdf_path, milvus_client=client)
     my_image_embedding.run()
-    text_embedding = TextEmbedding(pdf_file_path=pdf_path, milvus_client=client)
+    text_embedding = TextEmbedding(
+        pdf_file_path=pdf_path,
+        milvus_client=client)
     text_embedding.run()
     client.close()
